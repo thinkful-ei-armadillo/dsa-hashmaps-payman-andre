@@ -1,13 +1,14 @@
 const HashMap = require('./HashMap');
+const HashMapChain = require('./HashMapChain');
 
 function removeDupes(str) {
   const hash = new HashMap();
   let toReturn = '';
 
-  for(let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i++) {
     try {
       const check = hash.get(str[i]);
-    } catch(e) {
+    } catch (e) {
       hash.set(str[i], str[i]);
       toReturn += str[i];
     }
@@ -19,23 +20,23 @@ function removeDupes(str) {
 function canBePalindrome(str) {
   const hash = new HashMap();
 
-  for(let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i++) {
     try {
       let check = hash.get(str[i]);
 
       hash.set(str[i], ++check);
-    } catch(e) {
+    } catch (e) {
       hash.set(str[i], 1);
     }
   }
 
   let oddChar = null;
 
-  for(let i = 0; i < str.length; i++) {
+  for (let i = 0; i < str.length; i++) {
     const charCount = hash.get(str[i]);
 
-    if(charCount % 2 === 1) {
-      if(oddChar === null || oddChar === str[i]) {
+    if (charCount % 2 === 1) {
+      if (oddChar === null || oddChar === str[i]) {
         oddChar = str[i];
       } else {
         return false;
@@ -46,6 +47,58 @@ function canBePalindrome(str) {
   return true;
 }
 
+function anagramGrouping(arr) {
+  let toReturn = [];
+  let allHash = new HashMap();
+  arr.forEach(word => {
+    let hash = new HashMap();
+    for (let i = 0; i < word.length; i++) {
+      try {
+        let check = hash.get(word[i]);
+        hash.set(word[i], ++check);
+      } catch (e) {
+        hash.set(word[i], 1);
+      }
+    }
+    allHash.set(word, hash);
+  });
+  let count = 0;
+  for (let i = 0; i < arr.length; i++) {
+    let word = arr[i];
+    let hashOfWord = allHash.get(word);
+    if (hashOfWord !== 'CHECKED') {
+      toReturn[count] = [word];
+      for (let j = 0; j < arr.length; j++) {
+        const wordToCheck = arr[j];
+        if (word !== wordToCheck && word.length === wordToCheck.length) {
+          let isSame = true;
+          for (let index = 0; index < word.length; index++) {
+            let letter = word[index];
+            try {
+              if (
+                allHash.get(word).get(letter) !==
+                allHash.get(wordToCheck).get(letter)
+              ) {
+                isSame = false;
+                break;
+              }
+            } catch (e) {
+              isSame = false;
+              break;
+            }
+          }
+          if (isSame) {
+            toReturn[count].push(wordToCheck);
+            allHash.set(wordToCheck, 'CHECKED');
+          }
+        }
+      }
+      allHash.set(word, 'CHECKED');
+      count++;
+    }
+  }
+  return toReturn;
+}
 
 function main() {
   const hash = new HashMap();
@@ -74,6 +127,24 @@ function main() {
 
   console.log(canBePalindrome('racecar'));
   console.log(canBePalindrome('north'));
+
+  console.log(
+    anagramGrouping(['east', 'cars', 'acre', 'arcs', 'teas', 'eats', 'race'])
+  );
+
+  const hashChain = new HashMapChain();
+  hashChain.set('Hobbit', 'Bilbo');
+  hashChain.set('Hobbit', 'Frodo');
+  hashChain.set('Wizard', 'Gandolf');
+  hashChain.set('Human', 'Aragon');
+  hashChain.set('Elf', 'Legolas');
+  hashChain.set('Maiar', 'The Necromancer');
+  hashChain.set('Maiar', 'Sauron');
+  hashChain.set('RingBearer', 'Gollum');
+  hashChain.set('LadyOfLight', 'Galadriel');
+  hashChain.set('HalfElven', 'Arwen');
+  hashChain.set('Ent', 'Treebeard');
+  console.log(hashChain._hashTable);
 }
 
 main();
